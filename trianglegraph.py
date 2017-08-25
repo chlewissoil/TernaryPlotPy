@@ -6,7 +6,6 @@ import pylab as p
 import matplotlib.cm as cm
 from math import sqrt
 from matplotlib.mlab import csv2rec
-from matplotlib.mlab import load
 from matplotlib.cbook import to_filehandle
 
 class SoilTrianglePlot:
@@ -209,7 +208,6 @@ class SoilTrianglePlot:
         p.clf()
         p.axis('off')
         p.axis('equal')
-        p.hold(True)
         p.title(stitle)
         self.outline()
 
