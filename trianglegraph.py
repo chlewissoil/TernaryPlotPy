@@ -5,8 +5,9 @@
 import pylab as p
 import matplotlib.cm as cm
 from math import sqrt
-from matplotlib.mlab import csv2rec
-from matplotlib.mlab import load
+import pandas as pd
+# from matplotlib.mlab import csv2rec
+# from matplotlib.mlab import load
 from matplotlib.cbook import to_filehandle
 
 class SoilTrianglePlot:
@@ -29,16 +30,16 @@ class SoilTrianglePlot:
         return (cartxs, cartys)
 
     def satisfies_bounds(self, point, limits):
-        'point is 3 coordinates; limits is 3 pairs. Returns True or False (for closed set).'
-        global True
-        global False
+        """point is 3 coordinates; limits is 3 pairs. Returns True or False (for closed set)."""
+        # global True
+        # global False
         for i in [0, 1, 2]:
             if not (limits[i][0] <= point[i] <= limits[i][1]):
                 return False
         return True
 
     def scatter(self, threecoords, **kwargs):
-        'Scatterplots data given in triples, with the matplotlib keyword arguments'
+        """Scatterplots data given in triples, with the matplotlib keyword arguments"""
         global p
         (xs, ys) = self._toCart(threecoords)
         p.scatter(xs, ys, **kwargs)
@@ -170,46 +171,47 @@ class SoilTrianglePlot:
     def scatter_from_csv(self, filename, sand = 'sand', silt = 'silt', clay = 'clay', diameter = '', hue = '', tags = '', **kwargs):
         """Loads data from filename (expects csv format). Needs one header row with at least the columns {sand, silt, clay}. Can also plot two more variables for each point; specify the header value for columns to be plotted as diameter, hue. Can also add a text tag offset from each point; specify the header value for those tags.
         Note! text values (header entries, tag values ) need to be quoted to be recognized as text. """
-        fh = file(filename, 'rU')
-        soilrec = csv2rec(fh)
+        # fh = file(filename, 'rU')
+        fh = open(filename, 'rU')
+        # soilrec = csv2rec(fh)
+        soilrec = pd.read_csv(fh)
         count = 0
-        if (sand in soilrec.dtype.names):
+        if (sand in soilrec.dtypes):
             count = count + 1
-        if (silt in soilrec.dtype.names):
+        if (silt in soilrec.dtypes):
             count = count + 1
-        if (clay in soilrec.dtype.names):
+        if (clay in soilrec.dtypes):
             count = count + 1
         if (count < 3):
-            print "ERROR: need columns for sand, silt and clay identified in ', filename"
+            print("ERROR: need columns for sand, silt and clay identified in ', filename")
         locargs = {'s': None, 'c': None}
         for (col, key) in ((diameter, 's'), (hue, 'c')):
             col = col.lower()
-            if (col != '') and (col in soilrec.dtype.names):
-                locargs[key] = soilrec.field(col)
+            if (col != '') and (col in soilrec.dtypes):
+                locargs[key] = soilrec[col]
             else:
-                print 'ERROR: did not find ', col, 'in ', filename
+                print('ERROR: did not find ', col, 'in ', filename)
         for k in kwargs:
             locargs[k] = kwargs[k]
-        values = zip(*[soilrec.field(sand), soilrec.field(clay), soilrec.field(silt)])
-        print values
+        values = list(zip(*[soilrec[sand], soilrec[clay], soilrec[silt]]))
         (xs, ys) = self._toCart(values)
         p.scatter(xs, ys, label='_', **locargs)
         if (tags != ''):
             tags = tags.lower()
-            for (x, y, tag) in zip(*[xs, ys, soilrec.field(tags)]):
-                print x,
-                print y,
-                print tag
+            for (x, y, tag) in zip(*[xs, ys, soilrec[tags]]):
+                print (x),
+                print (y),
+                print (tag)
                 p.text(x + 1, y + 1, tag, fontsize=12)
         fh.close()
 
     def __init__(self, stitle = ''):
         global p
-        global True
+        # global True
         p.clf()
         p.axis('off')
         p.axis('equal')
-        p.hold(True)
+        # p.hold(True)
         p.title(stitle)
         self.outline()
 
